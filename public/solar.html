@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Solar System Explorer</title>
+  <style>
+    :root {
+      --bg: #030303;
+      --panel-bg: rgba(10, 10, 12, 0.85);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f4f4f5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 200;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      backdrop-filter: blur(10px);
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateX(-3px);
+    }
+
+    .space-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    .stars-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px);
+      background-size: 400px 400px;
+      opacity: 0.3;
+      z-index: 1;
+    }
+
+    .solar-system {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 5;
+    }
+
+    .sun {
+      width: 70px;
+      height: 70px;
+      background: radial-gradient(circle, #facc15 0%, #ea580c 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 50px #f97316;
+      position: absolute;
+      z-index: 100;
+      cursor: pointer;
+    }
+
+    /* 🌟 FIX: Disable pointer clicks on orbit lines so clicks pass through */
+    .orbit {
+      position: absolute;
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: spin linear infinite;
+      pointer-events: none; 
+    }
+
+    /* 🌟 FIX: Re-enable clicks exclusively on the planet markers */
+    .planet {
+      position: absolute;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      pointer-events: auto; 
+      z-index: 110;
+    }
+    
+    .planet:hover {
+      transform: scale(1.4);
+      box-shadow: 0 0 20px currentColor;
+    }
+
+    /* Target accurate dimensions up to Jupiter */
+    #mercury-orbit { width: 120px; height: 120px; animation-duration: 5s; }
+    #mercury { width: 12px; height: 12px; background: #a1a1aa; top: -6px; color: #a1a1aa; }
+
+    #venus-orbit { width: 180px; height: 180px; animation-duration: 8s; }
+    #venus { width: 18px; height: 18px; background: #fb923c; top: -9px; color: #fb923c; }
+
+    #earth-orbit { width: 250px; height: 250px; animation-duration: 12s; }
+    #earth { width: 22px; height: 22px; background: #3b82f6; top: -11px; color: #3b82f6; }
+
+    #mars-orbit { width: 310px; height: 310px; animation-duration: 18s; }
+    #mars { width: 16px; height: 16px; background: #ef4444; top: -8px; color: #ef4444; }
+
+    #jupiter-orbit { width: 380px; height: 380px; animation-duration: 28s; }
+    #jupiter { width: 34px; height: 34px; background: #e2e8f0; top: -17px; color: #e2e8f0; }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Side Panel Info */
+    .sidebar {
+      width: 400px;
+      background: var(--panel-bg);
+      border-left: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      padding: 40px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 150;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    }
+
+    .sidebar-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
+      margin-bottom: 25px;
+    }
+
+    .sidebar-header h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .sidebar-header p {
+      color: #71717a;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .planet-info-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .planet-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #6366f1;
+      margin-bottom: 15px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-cols: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .info-item {
+      background: rgba(255,255,255,0.02);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      color: #71717a;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .info-val {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .funfact {
+      color: #a1a1aa;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      font-style: italic;
+      border-left: 3px solid #6366f1;
+      padding-left: 12px;
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      align-self: flex-start;
+      margin-top: 15px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="stars-bg"></div>
+  
+  <a href="/" class="back-btn">
+    ⬅ Back to Portal
+  </a>
+
+  <div class="space-container">
+    <div class="solar-system">
+      <div class="sun" onclick="selectPlanet('Sun')"></div>
+      
+      <div class="orbit" id="mercury-orbit">
+        <div class="planet" id="mercury" onclick="selectPlanet('Mercury', event)"></div>
+      </div>
+      
+      <div class="orbit" id="venus-orbit">
+        <div class="planet" id="venus" onclick="selectPlanet('Venus', event)"></div>
+      </div>
+      
+      <div class="orbit" id="earth-orbit">
+        <div class="planet" id="earth" onclick="selectPlanet('Earth', event)"></div>
+      </div>
+      
+      <div class="orbit" id="mars-orbit">
+        <div class="planet" id="mars" onclick="selectPlanet('Mars', event)"></div>
+      </div>
+      
+      <div class="orbit" id="jupiter-orbit">
+        <div class="planet" id="jupiter" onclick="selectPlanet('Jupiter', event)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div>
+      <div class="sidebar-header">
+        <h2>Planet Stats</h2>
+        <p>Dynamic data fetched live from our backend REST API</p>
+      </div>
+
+      <div class="planet-info-card">
+        <div id="planet-name" class="planet-title">Select a Planet</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Temperature</div>
+            <div id="planet-temp" class="info-val">-</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Moons</div>
+            <div id="planet-moons" class="info-val">-</div>
+          </div>
+        </div>
+        <div id="planet-fact" class="funfact">Click on any celestial body in orbit to fetch its physical specifications from our custom server API.</div>
+        <span class="status-badge" id="api-status">API Ready</span>
+      </div>
+    </div>
+    
+    <div style="font-size: 0.8rem; color: #52525b; text-align: center;">
+      Devanshu's Node-REST-API Space Explorer
+    </div>
+  </div>
+
+  <script>
+    const OFFLINE_PLANETS = [
+      { name: "Mercury", temp: "167°C", moons: 0, funFact: "The smallest planet and closest to the Sun." },
+      { name: "Venus", temp: "464°C", moons: 0, funFact: "The hottest planet in our solar system, with a thick toxic atmosphere." },
+      { name: "Earth", temp: "15°C", moons: 1, funFact: "Our home planet, and the only known planet hosting life." },
+      { name: "Mars", temp: "-65°C", moons: 2, funFact: "Known as the Red Planet due to iron oxide rust on its surface." },
+      { name: "Jupiter", temp: "-110°C", moons: 95, funFact: "The largest planet the solar system, with a giant red storm." }
+    ];
+
+    async function selectPlanet(name, event) {
+      if (event) {
+        event.stopPropagation();
+      }
+      
+      const nameEl = document.getElementById('planet-name');
+      const tempEl = document.getElementById('planet-temp');
+      const moonsEl = document.getElementById('planet-moons');
+      const factEl = document.getElementById('planet-fact');
+      const apiStatusEl = document.getElementById('api-status');
+
+      nameEl.innerText = "Loading...";
+      apiStatusEl.innerText = "Querying API...";
+      apiStatusEl.style.borderColor = "rgba(245, 158, 11, 0.3)";
+      apiStatusEl.style.color = "#fbbf24";
+      apiStatusEl.style.background = "rgba(245, 158, 11, 0.15)";
+
+      try {
+        const response = await fetch('/api/v1/planets');
+        const json = await response.json();
+        
+        if (json.success) {
+          const planet = json.data.find(p => p.name.toLowerCase() === name.toLowerCase());
+          
+          if (planet) {
+            nameEl.innerText = planet.name;
+            tempEl.innerText = planet.temp;
+            moonsEl.innerText = planet.moons;
+            factEl.innerText = planet.funFact;
+            
+            apiStatusEl.innerText = "API Response: 200 OK";
+            apiStatusEl.style.borderColor = "rgba(16, 185, 129, 0.3)";
+            apiStatusEl.style.color = "#34d399";
+            apiStatusEl.style.background = "rgba(16, 185, 129, 0.15)";
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn("API Offline, triggering fallback...");
+      }
+
+      const offlinePlanet = OFFLINE_PLANETS.find(p => p.name.toLowerCase() === name.toLowerCase());
+      if (offlinePlanet) {
+        nameEl.innerText = offlinePlanet.name;
+        tempEl.innerText = offlinePlanet.temp;
+        moonsEl.innerText = offlinePlanet.moons;
+        factEl.innerText = offlinePlanet.funFact;
+        
+        apiStatusEl.innerText = "Local Fallback (Offline Mode)";
+        apiStatusEl.style.borderColor = "rgba(168, 85, 247, 0.3)";
+        apiStatusEl.style.color = "#c084fc";
+        apiStatusEl.style.background = "rgba(168, 85, 247, 0.15)";
+      } else if (name === 'Sun') {
+        nameEl.innerText = "The Sun";
+        tempEl.innerText = "5,500 °C";
+        moonsEl.innerText = "0";
+        factEl.innerText = "A nearly perfect sphere of hot plasma, heating the entire solar system.";
+        apiStatusEl.innerText = "Local Fallback (Offline Mode)";
+        apiStatusEl.style.borderColor = "rgba(168, 85, 247, 0.3)";
+        apiStatusEl.style.color = "#c084fc";
+        apiStatusEl.style.background = "rgba(168, 85, 247, 0.15)";
+      }
+    }
+  </script>
+</body>
+</html>
