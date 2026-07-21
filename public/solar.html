@@ -7,8 +7,8 @@
   <style>
     :root {
       --bg: #030303;
-      --panel-bg: rgba(10, 10, 12, 0.85);
-      --border: rgba(255, 255, 255, 0.1);
+      --panel-bg: rgba(10, 10, 14, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
       --text: #f4f4f5;
     }
 
@@ -29,27 +29,28 @@
 
     .back-btn {
       position: absolute;
-      top: 20px;
-      left: 20px;
+      top: 25px;
+      left: 25px;
       z-index: 200;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 10px 20px;
-      border-radius: 10px;
+      padding: 12px 24px;
+      border-radius: 12px;
       text-decoration: none;
       font-size: 0.9rem;
-      font-weight: 600;
+      font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
-      backdrop-filter: blur(10px);
+      gap: 10px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(12px);
     }
 
     .back-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
-      transform: translateX(-3px);
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(-4px);
+      box-shadow: 0 0 20px rgba(255,255,255,0.05);
     }
 
     .space-container {
@@ -67,7 +68,7 @@
       height: 100%;
       background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px);
       background-size: 400px 400px;
-      opacity: 0.3;
+      opacity: 0.35;
       z-index: 1;
     }
 
@@ -82,20 +83,25 @@
     }
 
     .sun {
-      width: 70px;
-      height: 70px;
-      background: radial-gradient(circle, #facc15 0%, #ea580c 100%);
+      width: 75px;
+      height: 75px;
+      background: radial-gradient(circle, #ffedd5 0%, #facc15 40%, #ea580c 80%, #7c2d12 100%);
       border-radius: 50%;
-      box-shadow: 0 0 50px #f97316;
+      box-shadow: 0 0 60px rgba(234, 88, 12, 0.8), 0 0 100px rgba(250, 204, 21, 0.4);
       position: absolute;
       z-index: 100;
       cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    
+    .sun:hover {
+      transform: scale(1.08);
     }
 
-    /* 🌟 FIX: Disable pointer clicks on orbit lines so clicks pass through */
+    /* Orbit System Styling */
     .orbit {
       position: absolute;
-      border: 1px dashed rgba(255, 255, 255, 0.12);
+      border: 1px dashed rgba(255, 255, 255, 0.1);
       border-radius: 50%;
       display: flex;
       justify-content: center;
@@ -104,36 +110,48 @@
       pointer-events: none; 
     }
 
-    /* 🌟 FIX: Re-enable clicks exclusively on the planet markers */
     .planet {
       position: absolute;
       border-radius: 50%;
       cursor: pointer;
-      transition: transform 0.2s ease;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
       pointer-events: auto; 
       z-index: 110;
     }
     
-    .planet:hover {
-      transform: scale(1.4);
-      box-shadow: 0 0 20px currentColor;
+    /* 🌟 ELITE 3D EFFECT: Casts a realistic shadow relative to the Sun */
+    .planet::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: linear-gradient(105deg, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.85) 85%);
+      pointer-events: none;
     }
 
-    /* Target accurate dimensions up to Jupiter */
-    #mercury-orbit { width: 120px; height: 120px; animation-duration: 5s; }
-    #mercury { width: 12px; height: 12px; background: #a1a1aa; top: -6px; color: #a1a1aa; }
+    .planet:hover {
+      transform: scale(1.45);
+      box-shadow: 0 0 25px currentColor;
+    }
 
-    #venus-orbit { width: 180px; height: 180px; animation-duration: 8s; }
-    #venus { width: 18px; height: 18px; background: #fb923c; top: -9px; color: #fb923c; }
+    /* Define individual planet tracks and designs */
+    #mercury-orbit { width: 130px; height: 130px; animation-duration: 6s; }
+    #mercury { width: 13px; height: 13px; background: radial-gradient(circle, #cbd5e1, #64748b); top: -6px; color: #a1a1aa; }
 
-    #earth-orbit { width: 250px; height: 250px; animation-duration: 12s; }
-    #earth { width: 22px; height: 22px; background: #3b82f6; top: -11px; color: #3b82f6; }
+    #venus-orbit { width: 190px; height: 190px; animation-duration: 10s; }
+    #venus { width: 18px; height: 18px; background: radial-gradient(circle, #fed7aa, #ea580c); top: -9px; color: #fb923c; }
 
-    #mars-orbit { width: 310px; height: 310px; animation-duration: 18s; }
-    #mars { width: 16px; height: 16px; background: #ef4444; top: -8px; color: #ef4444; }
+    #earth-orbit { width: 260px; height: 260px; animation-duration: 15s; }
+    #earth { width: 23px; height: 23px; background: radial-gradient(circle, #93c5fd, #2563eb); top: -11px; color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
 
-    #jupiter-orbit { width: 380px; height: 380px; animation-duration: 28s; }
-    #jupiter { width: 34px; height: 34px; background: #e2e8f0; top: -17px; color: #e2e8f0; }
+    #mars-orbit { width: 320px; height: 310px; animation-duration: 21s; }
+    #mars { width: 17px; height: 16px; background: radial-gradient(circle, #fca5a5, #b91c1c); top: -8px; color: #ef4444; }
+
+    #jupiter-orbit { width: 390px; height: 390px; animation-duration: 32s; }
+    #jupiter { width: 35px; height: 34px; background: radial-gradient(circle, #f1f5f9, #94a3b8); top: -17px; color: #cbd5e1; }
 
     @keyframes spin {
       100% { transform: rotate(360deg); }
@@ -141,100 +159,108 @@
 
     /* Side Panel Info */
     .sidebar {
-      width: 400px;
+      width: 420px;
       background: var(--panel-bg);
       border-left: 1px solid var(--border);
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(25px);
       padding: 40px 30px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       z-index: 150;
-      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+      box-shadow: -15px 0 35px rgba(0,0,0,0.6);
     }
 
     .sidebar-header {
       border-bottom: 1px solid var(--border);
-      padding-bottom: 20px;
-      margin-bottom: 25px;
+      padding-bottom: 24px;
+      margin-bottom: 30px;
     }
 
     .sidebar-header h2 {
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .sidebar-header p {
       color: #71717a;
       font-size: 0.9rem;
-      margin-top: 5px;
+      margin-top: 6px;
+      font-weight: 500;
     }
 
     .planet-info-card {
-      background: rgba(255,255,255,0.02);
+      background: rgba(255,255,255,0.01);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
+      border-radius: 20px;
+      padding: 28px;
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      box-shadow: inset 0 0 20px rgba(255,255,255,0.01);
     }
 
     .planet-title {
-      font-size: 2rem;
-      font-weight: 800;
-      color: #6366f1;
-      margin-bottom: 15px;
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #818cf8;
+      margin-bottom: 18px;
+      letter-spacing: -0.02em;
     }
 
     .info-grid {
       display: grid;
       grid-template-cols: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 20px;
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
     .info-item {
       background: rgba(255,255,255,0.02);
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.05);
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.03);
     }
 
     .info-label {
       font-size: 0.75rem;
       color: #71717a;
       text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 3px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      letter-spacing: 0.05em;
     }
 
     .info-val {
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 1.15rem;
+      font-weight: 700;
     }
 
     .funfact {
       color: #a1a1aa;
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 1rem;
+      line-height: 1.6;
       font-style: italic;
-      border-left: 3px solid #6366f1;
-      padding-left: 12px;
+      border-left: 4px solid #818cf8;
+      padding-left: 14px;
     }
 
     .status-badge {
       font-size: 0.75rem;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.25);
       color: #34d399;
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 9999px;
       align-self: flex-start;
-      margin-top: 15px;
-      font-weight: 600;
+      margin-top: 20px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
     }
   </style>
 </head>
@@ -245,6 +271,7 @@
     ⬅ Back to Portal
   </a>
 
+  <!-- 3D Orbits Section -->
   <div class="space-container">
     <div class="solar-system">
       <div class="sun" onclick="selectPlanet('Sun')"></div>
@@ -271,6 +298,7 @@
     </div>
   </div>
 
+  <!-- Sidebar -->
   <div class="sidebar">
     <div>
       <div class="sidebar-header">
@@ -306,7 +334,7 @@
       { name: "Venus", temp: "464°C", moons: 0, funFact: "The hottest planet in our solar system, with a thick toxic atmosphere." },
       { name: "Earth", temp: "15°C", moons: 1, funFact: "Our home planet, and the only known planet hosting life." },
       { name: "Mars", temp: "-65°C", moons: 2, funFact: "Known as the Red Planet due to iron oxide rust on its surface." },
-      { name: "Jupiter", temp: "-110°C", moons: 95, funFact: "The largest planet the solar system, with a giant red storm." }
+      { name: "Jupiter", temp: "-110°C", moons: 95, funFact: "The largest planet in the solar system, with a giant red storm." }
     ];
 
     async function selectPlanet(name, event) {
